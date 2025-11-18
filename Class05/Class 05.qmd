@@ -1,0 +1,34 @@
+---
+title: "Class 05: Data Visualization with **GGPLOT**"
+author: "Qihao Liu"
+format: html
+---
+
+Today we are exploring the **ggplot** package and how to make nice figures in R. 
+
+There are lots of ways to make figures and plots in R. These include:
+
+- so called "base" R 
+- and add on packages like **ggplot**
+
+Below is a simple "base" R plot:
+
+```{r}
+head(cars)
+```
+
+We can simply pass this do the `plot()` function.
+
+```{r}
+plot(cars)
+```
+
+>key-point: Base R is quick but not so nice-looking in some folks' eyes.
+
+Now we are gonna make this plot with **ggplot2**
+
+```{r}
+library(ggplot2)
+ggplot(cars)
+```
+

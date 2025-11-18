@@ -1,0 +1,234 @@
+---
+title: "Class 05: Data Visualization with **GGPLOT**"
+author: "Qihao Liu"
+format: pdf
+---
+
+Today we are exploring the **ggplot** package and how to make nice figures in R. 
+
+There are lots of ways to make figures and plots in R. These include:
+
+- so called "base" R 
+- and add on packages like **ggplot**
+
+Below is a simple "base" R plot:
+
+```{r}
+head(cars)
+```
+
+We can simply pass this do the `plot()` function.
+
+```{r}
+plot(cars)
+```
+
+>key-point: Base R is quick but not so nice-looking in some folks' eyes.
+
+Now we are gonna make this plot with **ggplot2**
+
+1st we need to install the **ggplot** package with the `install.packages()` function.
+- since we only need to install the package **once**, we do not want to install this package into the code chunk (as this will cause the code to run slowly because the package is getting installed over and over gain). **Instead**  we are gonna install it in R brain (the console)
+
+2nd we need to load the package with the `library()` function everytime we want to use it
+
+```{r}
+library(ggplot2)
+ggplot(cars)
+```
+
+This did not work because every gg plot is composed of at least 3 layers
+
+- data (i.e a data.frame with the things to plot)
+- aesthetics **aes()** that map the columns of the data to your plot feature
+- geoms like **geom_point()**
+
+```{r}
+ggplot(cars) +
+  aes(x=speed,y=dist) +
+  geom_point()
+```
+
+Compare base R plot with **ggplot**
+
+>key-point: For a simple "canned" plot, because R is quicker and more concise to write the code but as things get more customed and elaborate, the *ggplot* wins out.
+
+Let's add more layers to our ggplot.
+
+- Add a line showing the relationship between x and y (se=FALSE takes out the range around the linear fit)
+- Add a title
+- Add costume labels, x will be Speed (M/S), y will be dist (ft)
+- Change the theme
+
+```{r}
+ggplot(cars) +
+  aes(x=speed,y=dist) +
+  geom_point()+
+  geom_smooth(method="lm", se=FALSE)+
+  labs(title = "Silly plot of Speed vs Stoping Distance", 
+       x = "Speed (M/S)", 
+       y = "Dist (ft)") + 
+  theme_bw()
+```
+
+##Going Further
+
+Read some gene expression data:
+
+```{r}
+url <- "https://bioboot.github.io/bimm143_S20/class-material/up_down_expression.txt"
+genes <- read.delim(url)
+summary(genes)
+summary(genes[,"State"] =="up")
+head(genes)
+```
+
+> Q1. how many genes are in this data set? 
+Anwer: 5196       
+
+```{r}
+nrow(genes)
+ncol(genes)
+```
+
+
+> 12. How many "up" regulated genes are there? 
+Answer: 127
+
+note: a useful function for counting up occurrences of things in a vector is the `table()` function.
+
+```{r}
+summary(genes[,"State"] =="up")
+#or
+sum(genes$State == "up")
+#or
+table(genes$State)
+```
+
+Now we are gonna make the first plot using the gene data.
+
+Make a V1 figure
+
+```{r}
+library(ggplot2)
+ggplot(genes)+
+  aes(x=Condition1, 
+      y=Condition2)+
+  geom_point()
+```
+
+Now add colors to the graph to show up/down regulation
+
+- use `col = variable` in aes() to color based on specific variable 
+- use `+scale_colour_manual(values = c( "#D79D00","#79797C", "#C5AECF"))` to add additional layer to define custom color scale
+- we can also use `p<-` to save as a plot object, and use `p+additional layers` to build on the graph
+
+```{r}
+library(ggplot2)
+p <- ggplot(genes)+
+  aes(x=Condition1, 
+      y=Condition2,
+      col = State)+
+  scale_colour_manual(values = c( "#66ff00","#FF10F0", "#7A5901"))+
+  geom_point()
+
+p
+```
+
+```{r}
+p +
+  geom_boxplot()
+```
+
+## Going Further
+First, read the *gapminder* dataset
+```{r}
+url <- "https://raw.githubusercontent.com/jennybc/gapminder/master/inst/extdata/gapminder.tsv"
+
+gapminder <- read.delim(url)
+```
+
+Now let's have a wee peak
+
+```{r}
+head(gapminder, 3)
+tail(gapminder, 3)
+summary(gapminder)
+```
+>Q4. How many countries are in this dataset?
+Answer:142
+
+```{r}
+#Recall for 
+x <- c(1:5)
+x
+#we can use
+length(x)
+# this tells us how many elements are in X
+length(table(gapminder$country))
+
+#or
+length(unique(gapminder[,"country"]))
+```
+>Q5. How many continents are in this dataset?
+Answer: 5
+
+```{r}
+table(gapminder$continent)
+length(table(gapminder$continent))
+
+#or
+unique(gapminder[,"continent"])
+length(unique(gapminder[,"continent"]))
+```
+
+Now we make a plot study the relationship between life expectancy and GDP
+
+Make a v1 plot:
+
+```{r}
+ggplot(gapminder)+
+  aes(x = gdpPercap, y = lifeExp, color = continent)+
+  geom_point()
+```
+Make a v2 plot:
+
+
+```{r}
+ggplot(gapminder)+
+  aes(x = gdpPercap, y = lifeExp, color = continent,label = country)+
+  geom_text()+
+  geom_point()
+```
+we can use a package to adjust the labels: `ggrepl`, this will help us make more sensible, easier-to-read labels
+
+```{r}
+library(ggrepel)
+ggplot(gapminder)+
+  aes(x = gdpPercap, y = lifeExp, color = continent,label = country)+
+  geom_point()+
+  geom_text_repel()
+```
+
+Now we want to make this plot multi-paneled by continent
+
+```{r}
+
+ggplot(gapminder)+
+  aes(x = gdpPercap, y = lifeExp, color = continent)+
+  geom_point()+
+  facet_wrap(~continent)
+```
+
+Summary: What are the advantages of ggplot over base R plot?
+
+ggplot2 offers several advantages over base R plot:
+
+- It produces more visually appealing, publication-quality figures with sensible defaults, making it easier to create beautiful and complex plots quickly [[1]](https://drive.google.com/file/d/1BYSWJLROqxA1YpuDhJkzUolhiZqiOOKg/view?usp=drivesdk), [[3]](https://drive.google.com/file/d/1tFqKg9_nhVMmKYfiM1CQKDS2PmPwLh8n/view?usp=drivesdk), [[2]](https://drive.google.com/file/d/1Clw2_EJ_hY3USNwObiPnxpIQIfirxfW0/view?usp=drivesdk), [[5]](https://drive.google.com/file/d/15xXaaIcCWOc_x1gJLdySWOd_sfMXTiaw/view?usp=drivesdk).
+- Plots are built using a consistent, layered grammar (data, aesthetics, geometry), which makes code more readable and modular [[1]](https://drive.google.com/file/d/1BYSWJLROqxA1YpuDhJkzUolhiZqiOOKg/view?usp=drivesdk), [[3]](https://drive.google.com/file/d/1tFqKg9_nhVMmKYfiM1CQKDS2PmPwLh8n/view?usp=drivesdk), [[5]](https://drive.google.com/file/d/15xXaaIcCWOc_x1gJLdySWOd_sfMXTiaw/view?usp=drivesdk).
+- Customizing and refining plots is easier and less “fiddly” than with base R, which often requires many arguments and manual adjustments [[1]](https://drive.google.com/file/d/1BYSWJLROqxA1YpuDhJkzUolhiZqiOOKg/view?usp=drivesdk), [[3]](https://drive.google.com/file/d/1tFqKg9_nhVMmKYfiM1CQKDS2PmPwLh8n/view?usp=drivesdk), [[2]](https://drive.google.com/file/d/1Clw2_EJ_hY3USNwObiPnxpIQIfirxfW0/view?usp=drivesdk).
+- ggplot2 enables declarative specification of plots, mapping data to visual features in a clear way [[1]](https://drive.google.com/file/d/1BYSWJLROqxA1YpuDhJkzUolhiZqiOOKg/view?usp=drivesdk), [[3]](https://drive.google.com/file/d/1tFqKg9_nhVMmKYfiM1CQKDS2PmPwLh8n/view?usp=drivesdk).
+- Adding layers (e.g., points, lines, labels) and combining plots is straightforward, while base R often requires more complex code for advanced visualizations [[1]](https://drive.google.com/file/d/1BYSWJLROqxA1YpuDhJkzUolhiZqiOOKg/view?usp=drivesdk), [[3]](https://drive.google.com/file/d/1tFqKg9_nhVMmKYfiM1CQKDS2PmPwLh8n/view?usp=drivesdk), [[5]](https://drive.google.com/file/d/15xXaaIcCWOc_x1gJLdySWOd_sfMXTiaw/view?usp=drivesdk).
+- ggplot2 is widely used and supported, with extensive documentation and community resources [[1]](https://drive.google.com/file/d/1BYSWJLROqxA1YpuDhJkzUolhiZqiOOKg/view?usp=drivesdk), [[3]](https://drive.google.com/file/d/1tFqKg9_nhVMmKYfiM1CQKDS2PmPwLh8n/view?usp=drivesdk), [[2]](https://drive.google.com/file/d/1Clw2_EJ_hY3USNwObiPnxpIQIfirxfW0/view?usp=drivesdk).
+
+What aspect of ggplot2 are you most interested in using?
