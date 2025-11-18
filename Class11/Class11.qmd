@@ -1,0 +1,262 @@
+---
+title: "Class11: Protein Structure Prediction"
+name: Qihao Liu(U08901197)
+format: pdf
+---
+
+# Alpha Fold Data Base (AFDB)
+
+The EBI maintain the largest database of AlphaFold structure prediction models at https://alphafold.ebi.ac.uk/
+
+Recall from previous class we saw that the PDB has 244,295 (Oct 2025) protein structures
+
+The total number of protein sequences in Uniport is 199,579,901
+
+So PDB only has 0.12% structures
+because structure is inherently more costly and time consuming then sequence determination.
+
+> Key point: Only a tiny percentage of protein sequence has structural coverage (~0.12%)
+
+AFDB is an attempt to address this issue
+
+# Querying the AlphaFold database
+
+There are two quality scores to consider:
+
+1. **pLDDT** stands for “predicted local distance difference test”. It is a measure of how well the method has converged (i.e., how well the predicted structure agrees with MSA and PDB structure information).
+- If functional region is in a low pLDDT region, this specific model is useless
+
+2. **PAE** (predicted alignment score) measures the confidence in the relative position of the two residue. Increased error in PAE means decrease accuracy of prediction.
+
+# Generating your own structure predictions
+
+- Since our structure is not in alpha fold database, we are going to run our own structure predictions.
+(Note: When runing dimers, use ':' to break up the chains)
+
+- We removed spaces from the sequence when input it into the prediction program
+
+- After completing the job, we can download the zip file containing all results
+
+- Using Mol*, we are going to superimpose all the predicted structures
+
+The top model colored by chain:
+
+![](Image1.png)
+
+Superimposed models (Model 1 vs Model 5):
+
+![](Image2.png)
+Superimposed models (all):
+
+![](Image3.png)
+
+## Color by pLDDT
+
+Top Model (Model 1):
+
+![](Image4.png)
+Bottom Model (Model 5):
+
+![](Image5.png)
+
+# Custom analysis of resulting models
+
+Read key result files into R. The first thing we need to know is that what is the result's directory/folder is called (Name is different for each Alpha fold run)
+
+```{r}
+results_dir <- "HIV_Pr_Dimer_23119.result/HIV_Pr_Dimer_23119/"
+
+# File names for all PDB models
+pdb_files <- list.files(path=results_dir,
+                        pattern="*.pdb",
+                        full.names = TRUE)
+
+# Print our PDB file names
+basename(pdb_files)
+```
+
+```{r}
+library(bio3d)
+
+# Read all data from Models 
+#  and superpose/fit coords
+# pdbs <- pdbaln(pdb_files, fit=TRUE, exefile="msa")
+
+m1 <- read.pdb(pdb_files[1])
+m1
+```
+
+```{r}
+head(m1$atom$b)
+plot(m1$atom$b[m1$calpha],type="l")
+plot.bio3d(m1$atom$b[m1$calpha],type="l")
+```
+This is the pLDDT score for model 1, we can see that the score is consistently high throughout structure 1 (Note that the above two graphs are the same graphs, the difference is the scale of the y-axis)
+
+# Residue conservation from alignment file
+```{r}
+aln_file <- list.files(path=results_dir,
+                       pattern=".a3m$",
+                        full.names = TRUE)
+aln_file
+```
+Read this into R
+```{r}
+aln <- read.fasta(aln_file[1], to.upper = TRUE)
+dim(aln$ali)
+```
+Score Residue Conservation
+
+```{r}
+sim <- conserv(aln)
+
+plotb3(sim[1:99],ylab="Conservation Score")
+```
+From this graph, we can see that some positionsare highly conserved (AA following AA-20). These are the functional bit of the protein
+
+```{r}
+con <- consensus(aln,cutoff = 0.9)
+con$seq
+```
+Now we can see the four digits that are crucial for this class of molecule
+
+# Homework
+
+## Multiple Sequence Alignment
+
+```{r}
+pdbs <- pdbaln(pdb_files, fit=TRUE, exefile="msa")
+pdbs
+```
+
+## RMSD
+
+a standard measure of structural distance between coordinate sets. We will use `rsmd()` function to calculate the RMSD between all models
+
+```{r}
+rd<- rmsd(pdbs,fit=T)
+range(rd)
+```
+We can generate a heatmap of these RMSD matrix values
+
+```{r warning=FALSE}
+library(pheatmap)
+
+colnames(rd) <- paste0("m",1:5)
+rownames(rd) <- paste0("m",1:5)
+pheatmap(rd)
+```
+
+In this graph, we can see that the model m1, m2 are more similar to each other, and the model m4, m5 (and m3 to a lesser degree) are more similar to each other 
+
+## Plotting the pLDDT values
+
+First, let's read a reference PDB structure
+
+```{r}
+pdb <- read.pdb("1hsg")
+```
+
+
+```{r}
+plotb3(pdbs$b[1,], typ="l", lwd=2, sse=pdb)
+points(pdbs$b[2,], typ="l", col="red")
+points(pdbs$b[3,], typ="l", col="blue")
+points(pdbs$b[4,], typ="l", col="darkgreen")
+points(pdbs$b[5,], typ="l", col="orange")
+abline(v=100, col="gray")
+```
+
+In this graph, we can see that model 1 and 2 has consistenly high pLDDT scores across the structure, while models 3, 4, 5 has drastic decreases in pLDDT scores in some regions
+
+## RMSF (Root Mean Square Fluctuation Analysis)
+We can improve the superposition/fitting of our models by finding the most consistent “rigid core” common across all the models.
+
+```{r message=FALSE, result = "hide"}
+core <- core.find(pdbs)
+core.inds <- print(core, vol=0.5)
+xyz <- pdbfit(pdbs, core.inds, outpath="corefit_structures")
+```
+
+```{r}
+rf <- rmsf(xyz)
+
+plotb3(rf, sse=pdb)
+abline(v=100, col="gray", ylab="RMSF")
+```
+
+By plotting the root mean square differences, we can see that the first chain between the models are largely the same, and the second chain is the one where different prediction varies 
+
+## Predicted Alignment Error for domains
+
+AlphaFold produces an output called Predicted Aligned Error (PAE). we can read these files and see that AlphaFold produces a useful inter-domain prediction for model 1 but not for model 5
+
+```{r}
+library(jsonlite)
+
+# Listing of all PAE JSON files
+pae_files <- list.files(path=results_dir,
+                        pattern=".*model.*\\.json",
+                        full.names = TRUE)
+```
+
+```{r}
+pae1 <- read_json(pae_files[1],simplifyVector = TRUE)
+pae5 <- read_json(pae_files[5],simplifyVector = TRUE)
+attributes(pae1)
+head(pae1$plddt) 
+```
+
+The maximum PAE values are useful for ranking models. Here we can see that model 5 is much worse than model 1.
+
+```{r}
+pae1$max_pae
+pae5$max_pae
+```
+
+We can also plot PAE scores for each residue:
+
+For model 1:
+```{r}
+plot.dmat(pae1$pae, 
+          xlab="Residue Position (i)",
+          ylab="Residue Position (j)",
+          grid.col = "black",
+          zlim=c(0,30))
+```
+
+for Model 5:
+
+```{r}
+plot.dmat(pae5$pae, 
+          xlab="Residue Position (i)",
+          ylab="Residue Position (j)",
+          grid.col = "black",
+          zlim=c(0,30))
+```
+Again, we can see that model 1 is much better than model 5
+
+## Residue conservation from alignment file
+
+```{r}
+aln_file <- list.files(path=results_dir,
+                       pattern=".a3m$",
+                        full.names = TRUE)
+aln_file
+aln <- read.fasta(aln_file[1], to.upper = TRUE)
+dim(aln$ali)
+sim <- conserv(aln)
+plotb3(sim[1:99], sse=trim.pdb(pdb, chain="A"),
+       ylab="Conservation Score")
+con <- consensus(aln, cutoff = 0.9)
+con$seq
+```
+we can see the four digits that are crucial for this class of molecule
+
+```{r}
+m1.pdb <- read.pdb(pdb_files[1])
+occ <- vec2resno(c(sim[1:99], sim[1:99]), m1.pdb$atom$resno)
+write.pdb(m1.pdb, o=occ, file="m1_conserv.pdb")
+```
+
+![](Capture6.png)

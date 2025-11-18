@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Qihao Liu (PID:U08901197)">
+
+<title>Class07</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Class07_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Class07_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="Class07_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="Class07_files/libs/quarto-html/popper.min.js"></script>
+<script src="Class07_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Class07_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Class07_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Class07_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Class07_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Class07_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Class07_files/libs/bootstrap/bootstrap-bb462d781dde1847d9e3ccf7736099dd.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Class07</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Qihao Liu (PID:U08901197) </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Today we will explore some fundamental machine learning methods including clustering and dimensionality reduction.</p>
+<section id="k-means-clustering" class="level2">
+<h2 class="anchored" data-anchor-id="k-means-clustering">K-means clustering</h2>
+<p>To see how this works, Let’s first make up some data to cluster where we konw what the answer should be, we can use the <code>rnorm()</code> function to help here.</p>
+<ul>
+<li>this gives us n number of data drawn from a normal distribution with pre-determined mean and SD.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rnorm</span>(<span class="dv">50</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1]  0.33526276 -1.50886690 -0.99901048  0.68529423 -1.15906995  2.11457814
+ [7] -1.21156868 -0.77873020  0.77365442 -0.59914237 -0.66945869 -1.56217129
+[13] -1.61778443  0.27695953  0.46799664  0.23423806  0.07669244 -1.18687236
+[19] -0.40941946 -0.18069883  1.01299538  0.28879154 -0.16430011  1.46991349
+[25] -0.19461057 -0.56268039 -0.93635709 -1.16720476  0.60307326 -0.15591122
+[31] -0.60695010  0.16200342 -1.53047807  0.78430832 -1.11890207  0.47305036
+[37]  0.92392526 -0.16235180  1.98882549 -1.26399984  0.27568140  0.52826169
+[43] -0.36570062 -0.57659973  1.37239346  0.40937964  0.12953082  0.16906629
+[49]  0.24390056 -0.89756438</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">rnorm</span>(<span class="dv">50</span>,<span class="dv">15</span>,<span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Now let’s make up a data in which there’s clearly two distinct groups</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="at">mean=</span><span class="sc">-</span><span class="dv">3</span>), <span class="fu">rnorm</span>(<span class="dv">30</span>,<span class="at">mean=</span><span class="sc">+</span><span class="dv">3</span>))</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rev</span>(x) <span class="co">#reverse x</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(x,y) <span class="co">#column bind</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               x          y
+ [1,] -3.0283388  1.9848057
+ [2,] -3.2906731  1.5096261
+ [3,] -2.5168457  3.3530504
+ [4,] -3.5968261  2.4463274
+ [5,] -3.3079969  3.2640102
+ [6,] -2.4851006  2.5870914
+ [7,] -1.2185443  2.4369172
+ [8,] -3.2499499  1.7798989
+ [9,] -2.8688465  4.8407041
+[10,] -0.8887285  3.1819357
+[11,] -2.7521363  2.4680897
+[12,] -3.6270552  2.6872432
+[13,] -4.8010393  3.7936655
+[14,] -1.5360764  3.1038499
+[15,] -4.1037572  4.1747506
+[16,] -2.0949397  1.6735043
+[17,] -3.4374504  1.9750862
+[18,] -2.9163099  3.6971628
+[19,] -4.1921739  3.3053914
+[20,] -3.7266529  4.5868244
+[21,] -4.3420645  3.9840559
+[22,] -2.1744008  2.3296131
+[23,] -3.4106868  2.8155689
+[24,] -2.5055650  2.7127166
+[25,] -3.7885412  4.0605304
+[26,] -3.9305759  2.9563346
+[27,] -3.3944329  3.6513844
+[28,] -2.2702637  4.4178757
+[29,] -3.6602911  2.6040671
+[30,] -1.3480619  3.4886943
+[31,]  3.4886943 -1.3480619
+[32,]  2.6040671 -3.6602911
+[33,]  4.4178757 -2.2702637
+[34,]  3.6513844 -3.3944329
+[35,]  2.9563346 -3.9305759
+[36,]  4.0605304 -3.7885412
+[37,]  2.7127166 -2.5055650
+[38,]  2.8155689 -3.4106868
+[39,]  2.3296131 -2.1744008
+[40,]  3.9840559 -4.3420645
+[41,]  4.5868244 -3.7266529
+[42,]  3.3053914 -4.1921739
+[43,]  3.6971628 -2.9163099
+[44,]  1.9750862 -3.4374504
+[45,]  1.6735043 -2.0949397
+[46,]  4.1747506 -4.1037572
+[47,]  3.1038499 -1.5360764
+[48,]  3.7936655 -4.8010393
+[49,]  2.6872432 -3.6270552
+[50,]  2.4680897 -2.7521363
+[51,]  3.1819357 -0.8887285
+[52,]  4.8407041 -2.8688465
+[53,]  1.7798989 -3.2499499
+[54,]  2.4369172 -1.2185443
+[55,]  2.5870914 -2.4851006
+[56,]  3.2640102 -3.3079969
+[57,]  2.4463274 -3.5968261
+[58,]  3.3530504 -2.5168457
+[59,]  1.5096261 -3.2906731
+[60,]  1.9848057 -3.0283388</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">cbind</span>(x,y)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(z)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>Q: What does cbind do?</li>
+</ul>
+<p>The function for K-means clustering in “base” R is called <code>kmeans()</code> (k in kmeans means how many cluster you want)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(z, <span class="at">centers =</span> <span class="dv">2</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>k</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>K-means clustering with 2 clusters of sizes 30, 30
+
+Cluster means:
+          x         y
+1  3.062359 -3.015478
+2 -3.015478  3.062359
+
+Clustering vector:
+ [1] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1
+[39] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+
+Within cluster sum of squares by cluster:
+[1] 49.83523 49.83523
+ (between_SS / total_SS =  91.7 %)
+
+Available components:
+
+[1] "cluster"      "centers"      "totss"        "withinss"     "tot.withinss"
+[6] "betweenss"    "size"         "iter"         "ifault"      </code></pre>
+</div>
+</div>
+<p>To get the results of the returned list object, we can use the dollar <code>$</code> syntax, for example, to get the size of each cluster:</p>
+<ul>
+<li>Note the components listed fro K-means are essentially different types of results</li>
+</ul>
+<blockquote class="blockquote">
+<p>Q: how many points are in each cluster</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>k<span class="sc">$</span>size</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 30 30</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>Q: What ‘component’ gives - Membership/ Cluster Assignment - Cluster Center</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>k<span class="sc">$</span>cluster <span class="co">#Membership</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1
+[39] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>k<span class="sc">$</span>centers <span class="co">#Cluster Center</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          x         y
+1  3.062359 -3.015478
+2 -3.015478  3.062359</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>Q: Make a result figure of the data colored by cluster membership and show cluster centers</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(z, <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"red"</span>,<span class="st">"darkgreen"</span>)) <span class="co">#this colors the dots in alternating colors</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(z, <span class="at">col =</span> <span class="dv">2</span>) <span class="co">#color by bumber</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(z, <span class="at">col =</span> k<span class="sc">$</span>cluster, <span class="at">pch=</span><span class="dv">20</span>) <span class="co"># this basically tells R, use the number indicating each pt's membership to color them.</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(k<span class="sc">$</span>centers, <span class="at">col =</span> <span class="st">"lightblue"</span>, <span class="at">cex=</span><span class="dv">2</span>, <span class="at">pch=</span><span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-6-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>K-means clustering is very popular as it is very fast and relatively straight forward: it takes numeric data as input and returns the cluster membership vector etc. But the “issue/feature” of it is that you need to tell <code>kmeans()</code> how many cluster we want!</p>
+<blockquote class="blockquote">
+<p>Q: Run Kmeans() again and cluster into 4 groups, and plot the results So the result is not ideal…</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>k4 <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(z, <span class="at">centers=</span><span class="dv">4</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>k4<span class="sc">$</span>cluster</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 1 1 1 3 3 1 1 1 3 1 1 3 3 1 3 1 1 3 3 3 3 1 3 1 3 3 3 3 3 1 2 2 4 4 4 4 2 2
+[39] 2 4 4 4 4 2 2 4 2 4 2 2 2 4 2 2 2 4 2 2 2 2</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>k4<span class="sc">$</span>centers</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          x         y
+1 -2.323344  2.470349
+2  2.507671 -2.601204
+3 -3.621095  3.580369
+4  3.894391 -3.636888</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(z, <span class="at">col =</span> k4<span class="sc">$</span>cluster, <span class="at">pch=</span><span class="dv">20</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(k<span class="sc">$</span>centers, <span class="at">col =</span> <span class="st">"lightblue"</span>, <span class="at">cex=</span><span class="dv">2</span>, <span class="at">pch=</span><span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>An alternative way is to make a <strong>Scree Plot</strong>, graphing total variation within a cluster (measured as Total Within-Cluster Sum of Squares)against the number of centers, and we can take the “elbow” center (the centers n that has the greatest decrease in total variation within a cluster compare to n-1) to be the optimal one.</p>
+<ul>
+<li>Note scree is the place underneath a cliff that the rubbles collects</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>k1 <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(z, <span class="at">centers=</span><span class="dv">1</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>k2 <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(z, <span class="at">centers=</span><span class="dv">2</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>k3 <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(z, <span class="at">centers=</span><span class="dv">3</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>k4 <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(z, <span class="at">centers=</span><span class="dv">4</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>k4<span class="sc">$</span>tot.withinss</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 66.82952</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>k5 <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(z, <span class="at">centers=</span><span class="dv">5</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>k6 <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(z, <span class="at">centers=</span><span class="dv">6</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>k7 <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(z, <span class="at">centers=</span><span class="dv">7</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">c</span>(k1<span class="sc">$</span>tot.withinss, k2<span class="sc">$</span>tot.withinss, k3<span class="sc">$</span>tot.withinss, k4<span class="sc">$</span>tot.withinss, k5<span class="sc">$</span>tot.withinss, k6<span class="sc">$</span>tot.withinss, k7<span class="sc">$</span>tot.withinss)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x,y, <span class="at">type=</span><span class="st">"l"</span>, <span class="at">xlab =</span> <span class="st">"Centers"</span>, <span class="at">ylab =</span> <span class="st">"Total Within SS"</span>)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(x[<span class="dv">2</span>], y[<span class="dv">2</span>], <span class="at">labels =</span> <span class="st">"centers = 2"</span>, <span class="at">pos =</span> <span class="dv">3</span>, <span class="at">col =</span> <span class="st">"darkred"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>or we can use <code>for()</code> loop</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>) {</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">c</span>(n,<span class="fu">kmeans</span>(x, <span class="at">centers =</span> i)<span class="sc">$</span>tot.withinss)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(n, <span class="at">typ=</span><span class="st">"b"</span>)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-9-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-9-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-9-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-9-5.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="hierarchical-clustering" class="level2">
+<h2 class="anchored" data-anchor-id="hierarchical-clustering">Hierarchical Clustering</h2>
+<p>this meain “base” R function for Hierarchical Clustering is called <code>hclust()</code></p>
+<ul>
+<li>the only required input of <code>hclust()</code> is d, a disimilarity matrix generated by the <code>dist()</code> function</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hclust</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-error">
+<pre><code>Error in hclust(): argument "d" is missing, with no default</code></pre>
+</div>
+</div>
+<ul>
+<li><code>dist()</code> function calculate a distance matrix for our data, its a analysis of all paralle comparision of every point in data (it gives us a triangle because it is symmetrical)</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">dist</span>(z)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>hc <span class="ot">&lt;-</span> <span class="fu">hclust</span>(d)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>hc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+hclust(d = d)
+
+Cluster method   : complete 
+Distance         : euclidean 
+Number of objects: 60 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hc)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h=</span><span class="dv">10</span>, <span class="at">col =</span> <span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cutree</span>(hc,<span class="at">h=</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2
+[39] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2</code></pre>
+</div>
+</div>
+<p>if we look at the dendrogram, we can clearly see that there are two large clusters, and higher numbers are clustered on one side of the plot, and lower numbers are clustered on the other side of the plot (this is related to how we build the data, we get 30 numbers with one mean, and 30 other numbers with a different mean)</p>
+<p>Horizontal line contains the important information. We can see that if we cut the dendrogram at the dark red line with the <code>cutree ()</code> function, it would yield a membership output</p>
+<p>To get our cluster membership output (i.e.&nbsp;our main clustering results), we can cut the tree at a given height or at a height that yields a diven “k”</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>grps <span class="ot">&lt;-</span> <span class="fu">cutree</span>(hc,<span class="at">h=</span><span class="dv">10</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="co">#OR</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cutree</span>(hc,<span class="at">k=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2
+[39] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>Q: Plot the data with our hclut results coloring</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(z, <span class="at">col=</span> grps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="dimensionality-reduction-principle-component-analysispca" class="level2">
+<h2 class="anchored" data-anchor-id="dimensionality-reduction-principle-component-analysispca">Dimensionality Reduction: Principle Component Analysis(PCA)</h2>
+<p>The major goal of PCA is dimensionality reduction and lost as little information/essence of data as possible</p>
+<p>2D-Example: - The first principle component (PC) follows a best fit through the data points. - The second principle component picks up the wiggling of the data along the first PC - Combined, these captures most of the spread of the data and can act as new axis - The data should have max variation on PC1, PC2 captures the rest of the variants (Generally, for PC1,2,3, the variation captured decreases as the numbering goes up)</p>
+</section>
+<section id="principal-component-analysis-pca" class="level1">
+<h1>Principal Component Analysis (PCA)</h1>
+<section id="pca-of-uk-food-data" class="level2">
+<h2 class="anchored" data-anchor-id="pca-of-uk-food-data">PCA of UK Food Data</h2>
+<p>Import food data from an online CSV file.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>url <span class="ot">&lt;-</span> <span class="st">"https://tinyurl.com/UK-foods"</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(url)</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               X England Wales Scotland N.Ireland
+1         Cheese     105   103      103        66
+2  Carcass_meat      245   227      242       267
+3    Other_meat      685   803      750       586
+4           Fish     147   160      122        93
+5 Fats_and_oils      193   235      184       209
+6         Sugars     156   175      147       139</code></pre>
+</div>
+</div>
+<p>Note the for the first column, the name is X, and the row names are not food but numbers To fix this: We can try….</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(x) <span class="ot">&lt;-</span> x[,<span class="dv">1</span>]</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> x[,<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                    England Wales Scotland N.Ireland
+Cheese                  105   103      103        66
+Carcass_meat            245   227      242       267
+Other_meat              685   803      750       586
+Fish                    147   160      122        93
+Fats_and_oils           193   235      184       209
+Sugars                  156   175      147       139
+Fresh_potatoes          720   874      566      1033
+Fresh_Veg               253   265      171       143
+Other_Veg               488   570      418       355
+Processed_potatoes      198   203      220       187
+Processed_Veg           360   365      337       334
+Fresh_fruit            1102  1137      957       674
+Cereals                1472  1582     1462      1494
+Beverages                57    73       53        47
+Soft_drinks            1374  1256     1572      1506
+Alcoholic_drinks        375   475      458       135
+Confectionery            54    64       62        41</code></pre>
+</div>
+</div>
+<p>This is no good because the code is overwriting itself, so each time we run it, we lose some data.</p>
+<p>Instead, we do</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(url,<span class="at">row.names=</span><span class="dv">1</span>)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                    England Wales Scotland N.Ireland
+Cheese                  105   103      103        66
+Carcass_meat            245   227      242       267
+Other_meat              685   803      750       586
+Fish                    147   160      122        93
+Fats_and_oils           193   235      184       209
+Sugars                  156   175      147       139
+Fresh_potatoes          720   874      566      1033
+Fresh_Veg               253   265      171       143
+Other_Veg               488   570      418       355
+Processed_potatoes      198   203      220       187
+Processed_Veg           360   365      337       334
+Fresh_fruit            1102  1137      957       674
+Cereals                1472  1582     1462      1494
+Beverages                57    73       53        47
+Soft_drinks            1374  1256     1572      1506
+Alcoholic_drinks        375   475      458       135
+Confectionery            54    64       62        41</code></pre>
+</div>
+</div>
+<p>Now we can try some base figures:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">as.matrix</span>(x), <span class="at">beside=</span>T, <span class="at">col=</span><span class="fu">rainbow</span>(<span class="fu">nrow</span>(x)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">as.matrix</span>(x), <span class="at">beside=</span>F, <span class="at">col=</span><span class="fu">rainbow</span>(<span class="fu">nrow</span>(x)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-17-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>These plot are usless</p>
+<p>There is one plot that can be useful FOR SAMLL DATASET</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pairs</span>(x, <span class="at">col=</span><span class="fu">rainbow</span>(<span class="dv">10</span>), <span class="at">pch=</span><span class="dv">16</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>To read this plot, if we take the first row where it starts with “England”, we can see England vs Wales, England vs Scotland, England vs N. Ireland</p>
+<ul>
+<li>If the country eats exactly the same, it will be an diagnal line</li>
+<li>deviation from the diagnal highligths the differences in eating</li>
+<li>from this we can see that N. Ireland is very different &gt;Main point: it can be difficult to spot major trends and patterns even in relatively small multivariate dataset (here we only have 17 dimension, typically it could be 1000s)</li>
+</ul>
+</section>
+<section id="pca-to-the-rescue" class="level2">
+<h2 class="anchored" data-anchor-id="pca-to-the-rescue">PCA to the rescue</h2>
+<p>Now let’s try PCA on this data to see if it is actually useful. The main functionin “base” R for PCA is called <code>prcomp()</code></p>
+<ul>
+<li>First we transpose the data so food is in the columns. This allow us to do PCA on the food with <code>t()</code> transpose function.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">t</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          Cheese Carcass_meat  Other_meat  Fish Fats_and_oils  Sugars
+England      105           245         685  147            193    156
+Wales        103           227         803  160            235    175
+Scotland     103           242         750  122            184    147
+N.Ireland     66           267         586   93            209    139
+          Fresh_potatoes  Fresh_Veg  Other_Veg  Processed_potatoes 
+England               720        253        488                 198
+Wales                 874        265        570                 203
+Scotland              566        171        418                 220
+N.Ireland            1033        143        355                 187
+          Processed_Veg  Fresh_fruit  Cereals  Beverages Soft_drinks 
+England              360         1102     1472        57         1374
+Wales                365         1137     1582        73         1256
+Scotland             337          957     1462        53         1572
+N.Ireland            334          674     1494        47         1506
+          Alcoholic_drinks  Confectionery 
+England                 375             54
+Wales                   475             64
+Scotland                458             62
+N.Ireland               135             41</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>PCA <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(<span class="fu">t</span>(x))</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>PCA</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Standard deviations (1, .., p=4):
+[1] 3.241502e+02 2.127478e+02 7.387622e+01 3.175833e-14
+
+Rotation (n x k) = (17 x 4):
+                             PC1          PC2         PC3          PC4
+Cheese              -0.056955380  0.016012850  0.02394295 -0.694538519
+Carcass_meat         0.047927628  0.013915823  0.06367111  0.489884628
+Other_meat          -0.258916658 -0.015331138 -0.55384854  0.279023718
+Fish                -0.084414983 -0.050754947  0.03906481 -0.008483145
+Fats_and_oils       -0.005193623 -0.095388656 -0.12522257  0.076097502
+Sugars              -0.037620983 -0.043021699 -0.03605745  0.034101334
+Fresh_potatoes       0.401402060 -0.715017078 -0.20668248 -0.090972715
+Fresh_Veg           -0.151849942 -0.144900268  0.21382237 -0.039901917
+Other_Veg           -0.243593729 -0.225450923 -0.05332841  0.016719075
+Processed_potatoes  -0.026886233  0.042850761 -0.07364902  0.030125166
+Processed_Veg       -0.036488269 -0.045451802  0.05289191 -0.013969507
+Fresh_fruit         -0.632640898 -0.177740743  0.40012865  0.184072217
+Cereals             -0.047702858 -0.212599678 -0.35884921  0.191926714
+Beverages           -0.026187756 -0.030560542 -0.04135860  0.004831876
+Soft_drinks          0.232244140  0.555124311 -0.16942648  0.103508492
+Alcoholic_drinks    -0.463968168  0.113536523 -0.49858320 -0.316290619
+Confectionery       -0.029650201  0.005949921 -0.05232164  0.001847469</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PCA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Importance of components:
+                            PC1      PC2      PC3       PC4
+Standard deviation     324.1502 212.7478 73.87622 3.176e-14
+Proportion of Variance   0.6744   0.2905  0.03503 0.000e+00
+Cumulative Proportion    0.6744   0.9650  1.00000 1.000e+00</code></pre>
+</div>
+</div>
+<p>Note this summary tells us that PC1 captures 67.44% of the variants, PC2 29.05%, and PC3 3.5%. Together, PC1 and 2 captures &gt;95% of the variance</p>
+<p>Now let’s try to plot the results in “base” R and ggplot</p>
+<ul>
+<li>First figure out what we are plotting, we are plotting X, which contains the PCs, and since PC1 and PC2 capture most of the variation, we are only gonna plot them two</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>PCA<span class="sc">$</span>x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                 PC1         PC2        PC3           PC4
+England   -144.99315   -2.532999 105.768945 -4.894696e-14
+Wales     -240.52915 -224.646925 -56.475555  5.700024e-13
+Scotland   -91.86934  286.081786 -44.415495 -7.460785e-13
+N.Ireland  477.39164  -58.901862  -4.877895  2.321303e-13</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"orange"</span>,<span class="st">"darkgreen"</span>,<span class="st">"darkblue"</span>,<span class="st">"darkred"</span>)</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(PCA<span class="sc">$</span>x[,<span class="dv">1</span>], PCA<span class="sc">$</span>x[,<span class="dv">2</span>], <span class="at">col=</span>cols,<span class="at">pch=</span><span class="dv">16</span>, <span class="at">xlab =</span> <span class="st">"PC1"</span>, <span class="at">ylab =</span> <span class="st">"PC2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>If we are gonna use ggplot</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(PCA<span class="sc">$</span>x)<span class="sc">+</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(PC1,PC2)<span class="sc">+</span></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">col=</span>cols)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>From this graph, we can clearly see that N. Ireland is distinct from the rest of the countrys from the survey.</p>
+<p>But what food contributes to these PCs? We can figure this out, with <code>PCA$rotation</code>, we can see the contribution of each food to the different PCs, now if we plot it we can visualize what contributes to the PCs</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>PCA<span class="sc">$</span>rotation</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                             PC1          PC2         PC3          PC4
+Cheese              -0.056955380  0.016012850  0.02394295 -0.694538519
+Carcass_meat         0.047927628  0.013915823  0.06367111  0.489884628
+Other_meat          -0.258916658 -0.015331138 -0.55384854  0.279023718
+Fish                -0.084414983 -0.050754947  0.03906481 -0.008483145
+Fats_and_oils       -0.005193623 -0.095388656 -0.12522257  0.076097502
+Sugars              -0.037620983 -0.043021699 -0.03605745  0.034101334
+Fresh_potatoes       0.401402060 -0.715017078 -0.20668248 -0.090972715
+Fresh_Veg           -0.151849942 -0.144900268  0.21382237 -0.039901917
+Other_Veg           -0.243593729 -0.225450923 -0.05332841  0.016719075
+Processed_potatoes  -0.026886233  0.042850761 -0.07364902  0.030125166
+Processed_Veg       -0.036488269 -0.045451802  0.05289191 -0.013969507
+Fresh_fruit         -0.632640898 -0.177740743  0.40012865  0.184072217
+Cereals             -0.047702858 -0.212599678 -0.35884921  0.191926714
+Beverages           -0.026187756 -0.030560542 -0.04135860  0.004831876
+Soft_drinks          0.232244140  0.555124311 -0.16942648  0.103508492
+Alcoholic_drinks    -0.463968168  0.113536523 -0.49858320 -0.316290619
+Confectionery       -0.029650201  0.005949921 -0.05232164  0.001847469</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(PCA<span class="sc">$</span>rotation)<span class="sc">+</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(PC1,<span class="fu">rownames</span>(PCA<span class="sc">$</span>rotation))<span class="sc">+</span></span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class07_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This graph tells us that Ireland consume more soft drink and fresh potatoes</p>
+<p>PCA looks super useful, and we will come back to describe this further next class</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

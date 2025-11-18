@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Qihao Liu (U08901197)">
+
+<title>Lab09:Structural Bioinformatics Pt.1</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Class09_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Class09_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="Class09_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="Class09_files/libs/quarto-html/popper.min.js"></script>
+<script src="Class09_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Class09_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Class09_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Class09_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Class09_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Class09_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Class09_files/libs/bootstrap/bootstrap-bb462d781dde1847d9e3ccf7736099dd.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction-to-the-rcsb-protein-data-bank-pdb" id="toc-introduction-to-the-rcsb-protein-data-bank-pdb" class="nav-link active" data-scroll-target="#introduction-to-the-rcsb-protein-data-bank-pdb">Introduction to the RCSB Protein Data Bank (PDB)</a>
+  <ul class="collapse">
+  <li><a href="#pdb-statistics" id="toc-pdb-statistics" class="nav-link" data-scroll-target="#pdb-statistics">PDB statistics</a></li>
+  <li><a href="#the-pdb-format" id="toc-the-pdb-format" class="nav-link" data-scroll-target="#the-pdb-format">The PDB format</a></li>
+  <li><a href="#visualizing-the-hiv-1-protease-structure" id="toc-visualizing-the-hiv-1-protease-structure" class="nav-link" data-scroll-target="#visualizing-the-hiv-1-protease-structure">Visualizing the HIV-1 protease structure</a>
+  <ul class="collapse">
+  <li><a href="#using-mol" id="toc-using-mol" class="nav-link" data-scroll-target="#using-mol">Using Mol*</a></li>
+  <li><a href="#getting-to-know-hiv-pr" id="toc-getting-to-know-hiv-pr" class="nav-link" data-scroll-target="#getting-to-know-hiv-pr">Getting to know HIV-Pr</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#introduction-to-bio3d-in-r" id="toc-introduction-to-bio3d-in-r" class="nav-link" data-scroll-target="#introduction-to-bio3d-in-r">Introduction to Bio3D in R</a>
+  <ul class="collapse">
+  <li><a href="#quick-pdb-visualization-in-r" id="toc-quick-pdb-visualization-in-r" class="nav-link" data-scroll-target="#quick-pdb-visualization-in-r">Quick PDB visualization in R</a></li>
+  <li><a href="#predict-functional-motion" id="toc-predict-functional-motion" class="nav-link" data-scroll-target="#predict-functional-motion">Predict Functional Motion</a></li>
+  </ul></li>
+  <li><a href="#comparative-structure-analysis-of-adenylate-kinase" id="toc-comparative-structure-analysis-of-adenylate-kinase" class="nav-link" data-scroll-target="#comparative-structure-analysis-of-adenylate-kinase">Comparative Structure Analysis of Adenylate Kinase</a>
+  <ul class="collapse">
+  <li><a href="#set-up" id="toc-set-up" class="nav-link" data-scroll-target="#set-up">Set up</a></li>
+  <li><a href="#search-and-retrieve-adk-structures" id="toc-search-and-retrieve-adk-structures" class="nav-link" data-scroll-target="#search-and-retrieve-adk-structures">Search and retrieve ADK structures</a></li>
+  <li><a href="#align-and-superpose-structures" id="toc-align-and-superpose-structures" class="nav-link" data-scroll-target="#align-and-superpose-structures">Align and superpose structures</a>
+  <ul class="collapse">
+  <li><a href="#optional-viewing-our-superposed-structures" id="toc-optional-viewing-our-superposed-structures" class="nav-link" data-scroll-target="#optional-viewing-our-superposed-structures">Optional: Viewing our superposed structures</a></li>
+  </ul></li>
+  <li><a href="#annotate-collected-pdb-structures" id="toc-annotate-collected-pdb-structures" class="nav-link" data-scroll-target="#annotate-collected-pdb-structures">Annotate collected PDB structures</a></li>
+  <li><a href="#pca" id="toc-pca" class="nav-link" data-scroll-target="#pca">PCA</a></li>
+  </ul></li>
+  <li><a href="#optional-further-visualization" id="toc-optional-further-visualization" class="nav-link" data-scroll-target="#optional-further-visualization">Optional further visualization</a></li>
+  <li><a href="#normal-mode-analysis" id="toc-normal-mode-analysis" class="nav-link" data-scroll-target="#normal-mode-analysis">Normal mode analysis</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Lab09:Structural Bioinformatics Pt.1</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Qihao Liu (U08901197) </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction-to-the-rcsb-protein-data-bank-pdb" class="level1">
+<h1>Introduction to the RCSB Protein Data Bank (PDB)</h1>
+<section id="pdb-statistics" class="level2">
+<h2 class="anchored" data-anchor-id="pdb-statistics">PDB statistics</h2>
+<p>The main database for structural biology is called the PDB. Let’s have a look at what it contains:</p>
+<p>First, import the CSV file from PDB</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>stats <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"Data Export Summary.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Notice that some of the supposedly numeric values are imputed as character in the original CSV file So, if we try:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>stats<span class="sc">$</span>X.ray</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "176,204" "10,279"  "9,007"   "3,066"   "173"     "11"     </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(stats<span class="sc">$</span>X.ray)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-error">
+<pre><code>Error in sum(stats$X.ray): invalid 'type' (character) of argument</code></pre>
+</div>
+</div>
+<p>Notice that the numbers has “” around them because they are characters, and we receive a error when trying to calculate the sum of the X.ray structures</p>
+<ul>
+<li>Note: This is due to the “,” in the numeric value</li>
+</ul>
+<p>To fix this, we can try a different read function (need <code>install.packages("tidyverse")</code>)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>stats <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"Data Export Summary.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we try sum the structures solved by x.ray again, and it works:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(stats<span class="sc">$</span><span class="st">`</span><span class="at">X-ray</span><span class="st">`</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 198740</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>Q1: What percentage of structures in the PDB are solved by X-Ray and Electron Microscopy.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>A1: Percent of structures solved by x-ray is 81.48%, percent of structures solved by EM is 12.22%</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Structures solved by x-ray</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>x_ray <span class="ot">&lt;-</span> (<span class="fu">sum</span>(stats<span class="sc">$</span><span class="st">`</span><span class="at">X-ray</span><span class="st">`</span>)<span class="sc">/</span><span class="fu">sum</span>(stats<span class="sc">$</span><span class="st">`</span><span class="at">Total</span><span class="st">`</span>))<span class="sc">*</span><span class="dv">100</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(x_ray,<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 81.48</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Structures solved by EM</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>em <span class="ot">&lt;-</span> (<span class="fu">sum</span>(stats<span class="sc">$</span><span class="st">`</span><span class="at">EM</span><span class="st">`</span>)<span class="sc">/</span><span class="fu">sum</span>(stats<span class="sc">$</span><span class="st">`</span><span class="at">Total</span><span class="st">`</span>))<span class="sc">*</span><span class="dv">100</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(em,<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 12.22</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>Q2: What proportion of structures in the PDB are protein?</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>protein <span class="ot">&lt;-</span> <span class="fu">round</span>((<span class="fu">sum</span>(stats[<span class="dv">1</span>,<span class="dv">2</span><span class="sc">:</span><span class="dv">8</span>])<span class="sc">/</span><span class="fu">sum</span>(stats<span class="sc">$</span><span class="st">`</span><span class="at">Total</span><span class="st">`</span>))<span class="sc">*</span><span class="dv">100</span>,<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<blockquote class="blockquote">
+<p>A2: 86.05% of structures are proteins</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Q3: Type HIV in the PDB website search box on the home page and determine how many HIV-1 protease structures are in the current PDB?</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>A3: This query matches 4,865 Structures.</p>
+</blockquote>
+</section>
+<section id="the-pdb-format" class="level2">
+<h2 class="anchored" data-anchor-id="the-pdb-format">The PDB format</h2>
+<p>No let’s try to examine some structures from PDB. Starting off by downloading the 1HSG (HIV Protease) from PDB. This is the first protein of HIV targeted by drug.</p>
+<p>First we load a package for structural bioinformatics, bio3d. The read.pdb function in this package allows us to get the PDB file for a structure from the PDB website.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"bio3d"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'bio3d' was built under R version 4.5.2</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>hiv <span class="ot">&lt;-</span> <span class="fu">read.pdb</span>(<span class="st">"1HSG"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Note: Accessing on-line PDB file</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>hiv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+ Call:  read.pdb(file = "1HSG")
+
+   Total Models#: 1
+     Total Atoms#: 1686,  XYZs#: 5058  Chains#: 2  (values: A B)
+
+     Protein Atoms#: 1514  (residues/Calpha atoms#: 198)
+     Nucleic acid Atoms#: 0  (residues/phosphate atoms#: 0)
+
+     Non-protein/nucleic Atoms#: 172  (residues: 128)
+     Non-protein/nucleic resid values: [ HOH (127), MK1 (1) ]
+
+   Protein sequence:
+      PQITLWQRPLVTIKIGGQLKEALLDTGADDTVLEEMSLPGRWKPKMIGGIGGFIKVRQYD
+      QILIEICGHKAIGTVLVGPTPVNIIGRNLLTQIGCTLNFPQITLWQRPLVTIKIGGQLKE
+      ALLDTGADDTVLEEMSLPGRWKPKMIGGIGGFIKVRQYDQILIEICGHKAIGTVLVGPTP
+      VNIIGRNLLTQIGCTLNF
+
++ attr: atom, xyz, seqres, helix, sheet,
+        calpha, remark, call</code></pre>
+</div>
+</div>
+</section>
+<section id="visualizing-the-hiv-1-protease-structure" class="level2">
+<h2 class="anchored" data-anchor-id="visualizing-the-hiv-1-protease-structure">Visualizing the HIV-1 protease structure</h2>
+<section id="using-mol" class="level3">
+<h3 class="anchored" data-anchor-id="using-mol">Using Mol*</h3>
+<p>Let’s first use the Mol* viewer to explore this structure (Mol* is a 3D structure viewer runs online)</p>
+<ul>
+<li>Go to https://molstar.org/, input the PDB code, and apply</li>
+<li>Notice the MK1 compound in the center of the HIV protease</li>
+<li>Download a preliminary image of the structure, save the png. file in the project directory, include it in the lab sheets <img src="1HSG.png" class="img-fluid"></li>
+</ul>
+</section>
+<section id="getting-to-know-hiv-pr" class="level3">
+<h3 class="anchored" data-anchor-id="getting-to-know-hiv-pr">Getting to know HIV-Pr</h3>
+<p>There is a water molecue and an aspartate residue (Asp25, D25) that is important for the catalytic activity of HIV-Pr. Find them in the structure</p>
+<p><img src="1HSG_H2O_D25.png" class="img-fluid"> &gt;Q4: Water molecules normally have 3 atoms. Why do we see just one atom per water molecule in this structure?</p>
+<blockquote class="blockquote">
+<p>A4: Hydrogen is omitted from the H2O molecule because it is often not resolved</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Q5: There is a critical “conserved” water molecule in the binding site. Can you identify this water molecule? What residue number does this water molecule have</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>A5:311</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Q6: Generate and save a figure clearly showing the two distinct chains of HIV-protease along with the ligand. You might also consider showing the catalytic residues ASP 25 in each chain and the critical water (we recommend “Ball &amp; Stick” for these side-chains). Add this figure to your Quarto document.</p>
+</blockquote>
+<p><img src="1HSG_H2O_D25.png" class="img-fluid"></p>
+<blockquote class="blockquote">
+<p>Discussion Topic: Can you think of a way in which indinavir, or even larger ligands and substrates, could enter the binding site?</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>A: Because HIV-pr is formed by two homodimers, larger ligands can either enter the catalytic site when the two monomers forms a homodimer or it can also enter the binding site when the two monomers changes comformation in their active state, which provides passage into the active site.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Q7: [Optional] As you have hopefully observed HIV protease is a homodimer (i.e.&nbsp;it is composed of two identical chains). With the aid of the graphic display can you identify secondary structure elements that are likely to only form in the dimer rather than the monomer?</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>A7: The parallel betasheets on the C-terminus formed by two monomers is a structure elments that are likely to only form in the dimer rather than the monomer. Same goes to the catalytic site containing two aspartate residue, which only forms when the homodimer comes together.</p>
+</blockquote>
+</section>
+</section>
+</section>
+<section id="introduction-to-bio3d-in-r" class="level1">
+<h1>Introduction to Bio3D in R</h1>
+<p>##Reading PDB file data into R</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"bio3d"</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>hiv <span class="ot">&lt;-</span> <span class="fu">read.pdb</span>(<span class="st">"1HSG"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Note: Accessing on-line PDB file</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in get.pdb(file, path = tempdir(), verbose = FALSE):
+C:\Users\Thoma\AppData\Local\Temp\RtmpKIZ3aL/1HSG.pdb exists. Skipping download</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(hiv<span class="sc">$</span>atom)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  type eleno elety  alt resid chain resno insert      x      y     z o     b
+1 ATOM     1     N &lt;NA&gt;   PRO     A     1   &lt;NA&gt; 29.361 39.686 5.862 1 38.10
+2 ATOM     2    CA &lt;NA&gt;   PRO     A     1   &lt;NA&gt; 30.307 38.663 5.319 1 40.62
+3 ATOM     3     C &lt;NA&gt;   PRO     A     1   &lt;NA&gt; 29.760 38.071 4.022 1 42.64
+4 ATOM     4     O &lt;NA&gt;   PRO     A     1   &lt;NA&gt; 28.600 38.302 3.676 1 43.40
+5 ATOM     5    CB &lt;NA&gt;   PRO     A     1   &lt;NA&gt; 30.508 37.541 6.342 1 37.87
+6 ATOM     6    CG &lt;NA&gt;   PRO     A     1   &lt;NA&gt; 29.296 37.591 7.162 1 38.40
+  segid elesy charge
+1  &lt;NA&gt;     N   &lt;NA&gt;
+2  &lt;NA&gt;     C   &lt;NA&gt;
+3  &lt;NA&gt;     C   &lt;NA&gt;
+4  &lt;NA&gt;     O   &lt;NA&gt;
+5  &lt;NA&gt;     C   &lt;NA&gt;
+6  &lt;NA&gt;     C   &lt;NA&gt;</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>Q7: How many amino acid residues are there in this pdb object?</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>A7: There are a total of 198 protein residues in this pdb project</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Q8: Name one of the two non-protein residue?</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>A8: HOH</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Q9: How many protein chains are in the structure</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>A9: 2</p>
+</blockquote>
+<p>Extract the sequence</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pdbseq</span>(hiv)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 
+"P" "Q" "I" "T" "L" "W" "Q" "R" "P" "L" "V" "T" "I" "K" "I" "G" "G" "Q" "L" "K" 
+ 21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  40 
+"E" "A" "L" "L" "D" "T" "G" "A" "D" "D" "T" "V" "L" "E" "E" "M" "S" "L" "P" "G" 
+ 41  42  43  44  45  46  47  48  49  50  51  52  53  54  55  56  57  58  59  60 
+"R" "W" "K" "P" "K" "M" "I" "G" "G" "I" "G" "G" "F" "I" "K" "V" "R" "Q" "Y" "D" 
+ 61  62  63  64  65  66  67  68  69  70  71  72  73  74  75  76  77  78  79  80 
+"Q" "I" "L" "I" "E" "I" "C" "G" "H" "K" "A" "I" "G" "T" "V" "L" "V" "G" "P" "T" 
+ 81  82  83  84  85  86  87  88  89  90  91  92  93  94  95  96  97  98  99   1 
+"P" "V" "N" "I" "I" "G" "R" "N" "L" "L" "T" "Q" "I" "G" "C" "T" "L" "N" "F" "P" 
+  2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21 
+"Q" "I" "T" "L" "W" "Q" "R" "P" "L" "V" "T" "I" "K" "I" "G" "G" "Q" "L" "K" "E" 
+ 22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  40  41 
+"A" "L" "L" "D" "T" "G" "A" "D" "D" "T" "V" "L" "E" "E" "M" "S" "L" "P" "G" "R" 
+ 42  43  44  45  46  47  48  49  50  51  52  53  54  55  56  57  58  59  60  61 
+"W" "K" "P" "K" "M" "I" "G" "G" "I" "G" "G" "F" "I" "K" "V" "R" "Q" "Y" "D" "Q" 
+ 62  63  64  65  66  67  68  69  70  71  72  73  74  75  76  77  78  79  80  81 
+"I" "L" "I" "E" "I" "C" "G" "H" "K" "A" "I" "G" "T" "V" "L" "V" "G" "P" "T" "P" 
+ 82  83  84  85  86  87  88  89  90  91  92  93  94  95  96  97  98  99 
+"V" "N" "I" "I" "G" "R" "N" "L" "L" "T" "Q" "I" "G" "C" "T" "L" "N" "F" </code></pre>
+</div>
+</div>
+<p>Note that there are two chains included in this printed sequence. So we are gonna get only sequence from chain A</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">trim.pdb</span>(hiv,<span class="at">chain=</span><span class="st">"A"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+ Call:  trim.pdb(pdb = hiv, chain = "A")
+
+   Total Models#: 1
+     Total Atoms#: 801,  XYZs#: 2403  Chains#: 1  (values: A)
+
+     Protein Atoms#: 757  (residues/Calpha atoms#: 99)
+     Nucleic acid Atoms#: 0  (residues/phosphate atoms#: 0)
+
+     Non-protein/nucleic Atoms#: 44  (residues: 44)
+     Non-protein/nucleic resid values: [ HOH (44) ]
+
+   Protein sequence:
+      PQITLWQRPLVTIKIGGQLKEALLDTGADDTVLEEMSLPGRWKPKMIGGIGGFIKVRQYD
+      QILIEICGHKAIGTVLVGPTPVNIIGRNLLTQIGCTLNF
+
++ attr: atom, helix, sheet, seqres, xyz,
+        calpha, call</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>chainA_seq <span class="ot">&lt;-</span> <span class="fu">pdbseq</span>(<span class="fu">trim.pdb</span>(hiv,<span class="at">chain=</span><span class="st">"A"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="quick-pdb-visualization-in-r" class="level2">
+<h2 class="anchored" data-anchor-id="quick-pdb-visualization-in-r">Quick PDB visualization in R</h2>
+<p>Next, install the <strong>bio3dview</strong> packages on CRAN so we can interactively view these PDB objets in R</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bio3dview)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(NGLVieweR)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'NGLVieweR' was built under R version 4.5.2</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">view.pdb</span>(hiv)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="fu">view.pdb</span>(hiv, <span class="at">colorScheme =</span> <span class="st">"sse"</span>, <span class="at">backgroundColor =</span> <span class="st">"pink"</span>)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="co">#Selecting ASP25 Residue</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>sel <span class="ot">&lt;-</span> <span class="fu">atom.select</span>(hiv,<span class="at">resno=</span><span class="dv">25</span>)</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="fu">view.pdb</span>(hiv, <span class="at">highlight =</span> sel,</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">colorScheme =</span> <span class="st">"sse"</span>,</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">backgroundColor =</span> <span class="st">"pink"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="predict-functional-motion" class="level2">
+<h2 class="anchored" data-anchor-id="predict-functional-motion">Predict Functional Motion</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bio3d)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="co">#Read Structure</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>adk <span class="ot">&lt;-</span> <span class="fu">read.pdb</span>(<span class="st">"6s36"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Note: Accessing on-line PDB file
+   PDB has ALT records, taking A only, rm.alt=TRUE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>adk</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+ Call:  read.pdb(file = "6s36")
+
+   Total Models#: 1
+     Total Atoms#: 1898,  XYZs#: 5694  Chains#: 1  (values: A)
+
+     Protein Atoms#: 1654  (residues/Calpha atoms#: 214)
+     Nucleic acid Atoms#: 0  (residues/phosphate atoms#: 0)
+
+     Non-protein/nucleic Atoms#: 244  (residues: 244)
+     Non-protein/nucleic resid values: [ CL (3), HOH (238), MG (2), NA (1) ]
+
+   Protein sequence:
+      MRIILLGAPGAGKGTQAQFIMEKYGIPQISTGDMLRAAVKSGSELGKQAKDIMDAGKLVT
+      DELVIALVKERIAQEDCRNGFLLDGFPRTIPQADAMKEAGINVDYVLEFDVPDELIVDKI
+      VGRRVHAPSGRVYHVKFNPPKVEGKDDVTGEELTTRKDDQEETVRKRLVEYHQMTAPLIG
+      YYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILG
+
++ attr: atom, xyz, seqres, helix, sheet,
+        calpha, remark, call</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Run calculation</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">nma</span>(adk)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> Building Hessian...        Done in 0.03 seconds.
+ Diagonalizing Hessian...   Done in 0.35 seconds.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>m</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+  nma.pdb(pdb = adk)
+
+Class:
+  VibrationalModes (nma)
+
+Number of modes:
+  642 (6 trivial)
+
+Frequencies:
+  Mode 7:   0.005
+  Mode 8:   0.007
+  Mode 9:   0.009
+  Mode 10:  0.011
+  Mode 11:  0.013
+  Mode 12:  0.015
+
++ attr: modes, frequencies, force.constants, fluctuations,
+        U, L, xyz, mass, temp, triv.modes, natoms, call</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class09_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Generate a “trajectory” of predicted motion</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mktrj</span>(m,<span class="at">file=</span><span class="st">"ADK_nma.pdb"</span>)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">view.nma</span>(m, <span class="at">pdb=</span>adk)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="comparative-structure-analysis-of-adenylate-kinase" class="level1">
+<h1>Comparative Structure Analysis of Adenylate Kinase</h1>
+<p>The goal of this section is to perform principal component analysis (PCA) on the complete collection of Adenylate kinase structures in the protein data-bank (PDB).</p>
+<section id="set-up" class="level2">
+<h2 class="anchored" data-anchor-id="set-up">Set up</h2>
+<blockquote class="blockquote">
+<p>Q10. Which of the packages above is found only on BioConductor and not CRAN?</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>A10: msa</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Q11. Which of the above packages is not found on BioConductor or CRAN?:</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>A11: bio3dview</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Q12. True or False? Functions from the pak package can be used to install packages from GitHub and BitBucket?</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>A12: TRUE</p>
+</blockquote>
+</section>
+<section id="search-and-retrieve-adk-structures" class="level2">
+<h2 class="anchored" data-anchor-id="search-and-retrieve-adk-structures">Search and retrieve ADK structures</h2>
+<p>Get ADK sequence from PDB</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bio3d)</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>aa <span class="ot">&lt;-</span> <span class="fu">get.seq</span>(<span class="st">"1ake_A"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in get.seq("1ake_A"): Removing existing file: seqs.fasta</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Fetching... Please wait. Done.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>aa</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>             1        .         .         .         .         .         60 
+pdb|1AKE|A   MRIILLGAPGAGKGTQAQFIMEKYGIPQISTGDMLRAAVKSGSELGKQAKDIMDAGKLVT
+             1        .         .         .         .         .         60 
+
+            61        .         .         .         .         .         120 
+pdb|1AKE|A   DELVIALVKERIAQEDCRNGFLLDGFPRTIPQADAMKEAGINVDYVLEFDVPDELIVDRI
+            61        .         .         .         .         .         120 
+
+           121        .         .         .         .         .         180 
+pdb|1AKE|A   VGRRVHAPSGRVYHVKFNPPKVEGKDDVTGEELTTRKDDQEETVRKRLVEYHQMTAPLIG
+           121        .         .         .         .         .         180 
+
+           181        .         .         .   214 
+pdb|1AKE|A   YYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILG
+           181        .         .         .   214 
+
+Call:
+  read.fasta(file = outfile)
+
+Class:
+  fasta
+
+Alignment dimensions:
+  1 sequence rows; 214 position columns (214 non-gap, 0 gap) 
+
++ attr: id, ali, call</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>Q13. How many amino acids are in this sequence, i.e.&nbsp;how long is this sequence?</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>A13:214</p>
+</blockquote>
+<p>Now we can use this sequence as a query to BLAST search the PDB to find similar sequences and structures.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Blast or hmmer search </span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="co">#b &lt;- blast.pdb(aa)</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="co">#hits &lt;- plot(b)</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a><span class="co">#head(hits$pdb.id)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Unable to access BLAST service at the time, try alternative code:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>hits <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>hits<span class="sc">$</span>pdb.id <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'1AKE_A'</span>,<span class="st">'6S36_A'</span>,<span class="st">'6RZE_A'</span>,<span class="st">'3HPR_A'</span>,<span class="st">'1E4V_A'</span>,<span class="st">'5EJE_A'</span>,<span class="st">'1E4Y_A'</span>,<span class="st">'3X2S_A'</span>,<span class="st">'6HAP_A'</span>,<span class="st">'6HAM_A'</span>,<span class="st">'4K46_A'</span>,<span class="st">'3GMT_A'</span>,<span class="st">'4PZL_A'</span>)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="co">#Download related PDB files</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>files <span class="ot">&lt;-</span> <span class="fu">get.pdb</span>(hits<span class="sc">$</span>pdb.id, <span class="at">path=</span><span class="st">"pdbs"</span>, <span class="at">split=</span><span class="cn">TRUE</span>, <span class="at">gzip=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in get.pdb(hits$pdb.id, path = "pdbs", split = TRUE, gzip = TRUE):
+pdbs/1AKE.pdb exists. Skipping download</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in get.pdb(hits$pdb.id, path = "pdbs", split = TRUE, gzip = TRUE):
+pdbs/6S36.pdb exists. Skipping download</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in get.pdb(hits$pdb.id, path = "pdbs", split = TRUE, gzip = TRUE):
+pdbs/6RZE.pdb exists. Skipping download</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in get.pdb(hits$pdb.id, path = "pdbs", split = TRUE, gzip = TRUE):
+pdbs/3HPR.pdb exists. Skipping download</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in get.pdb(hits$pdb.id, path = "pdbs", split = TRUE, gzip = TRUE):
+pdbs/1E4V.pdb exists. Skipping download</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in get.pdb(hits$pdb.id, path = "pdbs", split = TRUE, gzip = TRUE):
+pdbs/5EJE.pdb exists. Skipping download</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in get.pdb(hits$pdb.id, path = "pdbs", split = TRUE, gzip = TRUE):
+pdbs/1E4Y.pdb exists. Skipping download</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in get.pdb(hits$pdb.id, path = "pdbs", split = TRUE, gzip = TRUE):
+pdbs/3X2S.pdb exists. Skipping download</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in get.pdb(hits$pdb.id, path = "pdbs", split = TRUE, gzip = TRUE):
+pdbs/6HAP.pdb exists. Skipping download</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in get.pdb(hits$pdb.id, path = "pdbs", split = TRUE, gzip = TRUE):
+pdbs/6HAM.pdb exists. Skipping download</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in get.pdb(hits$pdb.id, path = "pdbs", split = TRUE, gzip = TRUE):
+pdbs/4K46.pdb exists. Skipping download</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in get.pdb(hits$pdb.id, path = "pdbs", split = TRUE, gzip = TRUE):
+pdbs/3GMT.pdb exists. Skipping download</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in get.pdb(hits$pdb.id, path = "pdbs", split = TRUE, gzip = TRUE):
+pdbs/4PZL.pdb exists. Skipping download</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  |                                                                            
+  |                                                                      |   0%
+  |                                                                            
+  |=====                                                                 |   8%
+  |                                                                            
+  |===========                                                           |  15%
+  |                                                                            
+  |================                                                      |  23%
+  |                                                                            
+  |======================                                                |  31%
+  |                                                                            
+  |===========================                                           |  38%
+  |                                                                            
+  |================================                                      |  46%
+  |                                                                            
+  |======================================                                |  54%
+  |                                                                            
+  |===========================================                           |  62%
+  |                                                                            
+  |================================================                      |  69%
+  |                                                                            
+  |======================================================                |  77%
+  |                                                                            
+  |===========================================================           |  85%
+  |                                                                            
+  |=================================================================     |  92%
+  |                                                                            
+  |======================================================================| 100%</code></pre>
+</div>
+</div>
+</section>
+<section id="align-and-superpose-structures" class="level2">
+<h2 class="anchored" data-anchor-id="align-and-superpose-structures">Align and superpose structures</h2>
+<p>Next, use <code>pdbaln()</code> to align and superpose the identified PDB structures</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Align releated PDBs</span></span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>pdbs <span class="ot">&lt;-</span> <span class="fu">pdbaln</span>(files, <span class="at">fit =</span> <span class="cn">TRUE</span>, <span class="at">exefile=</span><span class="st">"msa"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading PDB files:
+pdbs/split_chain/1AKE_A.pdb
+pdbs/split_chain/6S36_A.pdb
+pdbs/split_chain/6RZE_A.pdb
+pdbs/split_chain/3HPR_A.pdb
+pdbs/split_chain/1E4V_A.pdb
+pdbs/split_chain/5EJE_A.pdb
+pdbs/split_chain/1E4Y_A.pdb
+pdbs/split_chain/3X2S_A.pdb
+pdbs/split_chain/6HAP_A.pdb
+pdbs/split_chain/6HAM_A.pdb
+pdbs/split_chain/4K46_A.pdb
+pdbs/split_chain/3GMT_A.pdb
+pdbs/split_chain/4PZL_A.pdb
+   PDB has ALT records, taking A only, rm.alt=TRUE
+.   PDB has ALT records, taking A only, rm.alt=TRUE
+.   PDB has ALT records, taking A only, rm.alt=TRUE
+.   PDB has ALT records, taking A only, rm.alt=TRUE
+..   PDB has ALT records, taking A only, rm.alt=TRUE
+....   PDB has ALT records, taking A only, rm.alt=TRUE
+.   PDB has ALT records, taking A only, rm.alt=TRUE
+...
+
+Extracting sequences
+
+pdb/seq: 1   name: pdbs/split_chain/1AKE_A.pdb 
+   PDB has ALT records, taking A only, rm.alt=TRUE
+pdb/seq: 2   name: pdbs/split_chain/6S36_A.pdb 
+   PDB has ALT records, taking A only, rm.alt=TRUE
+pdb/seq: 3   name: pdbs/split_chain/6RZE_A.pdb 
+   PDB has ALT records, taking A only, rm.alt=TRUE
+pdb/seq: 4   name: pdbs/split_chain/3HPR_A.pdb 
+   PDB has ALT records, taking A only, rm.alt=TRUE
+pdb/seq: 5   name: pdbs/split_chain/1E4V_A.pdb 
+pdb/seq: 6   name: pdbs/split_chain/5EJE_A.pdb 
+   PDB has ALT records, taking A only, rm.alt=TRUE
+pdb/seq: 7   name: pdbs/split_chain/1E4Y_A.pdb 
+pdb/seq: 8   name: pdbs/split_chain/3X2S_A.pdb 
+pdb/seq: 9   name: pdbs/split_chain/6HAP_A.pdb 
+pdb/seq: 10   name: pdbs/split_chain/6HAM_A.pdb 
+   PDB has ALT records, taking A only, rm.alt=TRUE
+pdb/seq: 11   name: pdbs/split_chain/4K46_A.pdb 
+   PDB has ALT records, taking A only, rm.alt=TRUE
+pdb/seq: 12   name: pdbs/split_chain/3GMT_A.pdb 
+pdb/seq: 13   name: pdbs/split_chain/4PZL_A.pdb </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Vector containing PDB codes for figure axis</span></span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>ids <span class="ot">&lt;-</span> <span class="fu">basename.pdb</span>(pdbs<span class="sc">$</span>id)</span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Draw schematic alignment</span></span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pdbs, <span class="at">labels=</span>ids)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class09_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="optional-viewing-our-superposed-structures" class="level3">
+<h3 class="anchored" data-anchor-id="optional-viewing-our-superposed-structures">Optional: Viewing our superposed structures</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bio3dview)</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a><span class="fu">view.pdbs</span>(pdbs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="annotate-collected-pdb-structures" class="level2">
+<h2 class="anchored" data-anchor-id="annotate-collected-pdb-structures">Annotate collected PDB structures</h2>
+<p><code>pdb.annotate()</code> allow us to annotate the PDB files we have downloaded</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>anno <span class="ot">&lt;-</span> <span class="fu">pdb.annotate</span>(ids)</span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(anno<span class="sc">$</span>source)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Escherichia coli"                                
+[2] "Escherichia coli K-12"                           
+[3] "Escherichia coli O139:H28 str. E24377A"          
+[4] "Escherichia coli str. K-12 substr. MDS42"        
+[5] "Photobacterium profundum"                        
+[6] "Burkholderia pseudomallei 1710b"                 
+[7] "Francisella tularensis subsp. tularensis SCHU S4"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(anno)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       structureId chainId macromoleculeType chainLength experimentalTechnique
+1AKE_A        1AKE       A           Protein         214                 X-ray
+6S36_A        6S36       A           Protein         214                 X-ray
+6RZE_A        6RZE       A           Protein         214                 X-ray
+3HPR_A        3HPR       A           Protein         214                 X-ray
+1E4V_A        1E4V       A           Protein         214                 X-ray
+5EJE_A        5EJE       A           Protein         214                 X-ray
+       resolution       scopDomain                                        pfam
+1AKE_A       2.00 Adenylate kinase                      Adenylate kinase (ADK)
+6S36_A       1.60             &lt;NA&gt; Adenylate kinase, active site lid (ADK_lid)
+6RZE_A       1.69             &lt;NA&gt;                      Adenylate kinase (ADK)
+3HPR_A       2.00             &lt;NA&gt;                      Adenylate kinase (ADK)
+1E4V_A       1.85 Adenylate kinase                      Adenylate kinase (ADK)
+5EJE_A       1.90             &lt;NA&gt;                      Adenylate kinase (ADK)
+               ligandId                                       ligandName
+1AKE_A              AP5                 BIS(ADENOSINE)-5'-PENTAPHOSPHATE
+6S36_A CL (3),NA,MG (2)    CHLORIDE ION (3),SODIUM ION,MAGNESIUM ION (2)
+6RZE_A    NA (3),CL (2)                  SODIUM ION (3),CHLORIDE ION (2)
+3HPR_A              AP5                 BIS(ADENOSINE)-5'-PENTAPHOSPHATE
+1E4V_A              AP5                 BIS(ADENOSINE)-5'-PENTAPHOSPHATE
+5EJE_A           AP5,CO BIS(ADENOSINE)-5'-PENTAPHOSPHATE,COBALT (II) ION
+                                       source
+1AKE_A                       Escherichia coli
+6S36_A                       Escherichia coli
+6RZE_A                       Escherichia coli
+3HPR_A                  Escherichia coli K-12
+1E4V_A                       Escherichia coli
+5EJE_A Escherichia coli O139:H28 str. E24377A
+                                                                                                                                                                     structureTitle
+1AKE_A STRUCTURE OF THE COMPLEX BETWEEN ADENYLATE KINASE FROM ESCHERICHIA COLI AND THE INHIBITOR AP5A REFINED AT 1.9 ANGSTROMS RESOLUTION: A MODEL FOR A CATALYTIC TRANSITION STATE
+6S36_A                                                                                                                   Crystal structure of E. coli Adenylate kinase R119K mutant
+6RZE_A                                                                                                                   Crystal structure of E. coli Adenylate kinase R119A mutant
+3HPR_A                                                                                               Crystal structure of V148G adenylate kinase from E. coli, in complex with Ap5A
+1E4V_A                                                                                                       Mutant G10V of adenylate kinase from E. coli, modified in the Gly-loop
+5EJE_A                                                                                  Crystal structure of E. coli Adenylate kinase G56C/T163C double mutant in complex with Ap5a
+                                                    citation rObserved  rFree
+1AKE_A             Muller, C.W., et al. J Mol Biology (1992)    0.1960     NA
+6S36_A                 Rogne, P., et al. Biochemistry (2019)    0.1632 0.2356
+6RZE_A                 Rogne, P., et al. Biochemistry (2019)    0.1865 0.2350
+3HPR_A Schrank, T.P., et al. Proc Natl Acad Sci U S A (2009)    0.2100 0.2432
+1E4V_A                  Muller, C.W., et al. Proteins (1993)    0.1960     NA
+5EJE_A Kovermann, M., et al. Proc Natl Acad Sci U S A (2017)    0.1889 0.2358
+        rWork spaceGroup
+1AKE_A 0.1960  P 21 2 21
+6S36_A 0.1594    C 1 2 1
+6RZE_A 0.1819    C 1 2 1
+3HPR_A 0.2062  P 21 21 2
+1E4V_A 0.1960  P 21 2 21
+5EJE_A 0.1863  P 21 2 21</code></pre>
+</div>
+</div>
+</section>
+<section id="pca" class="level2">
+<h2 class="anchored" data-anchor-id="pca">PCA</h2>
+<p>PCA can be performed on the structural ensemble (stored in the pdbs object)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Perform PCA</span></span>
+<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a>pc.xray <span class="ot">&lt;-</span> <span class="fu">pca</span>(pdbs)</span>
+<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a>pc.xray</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+  pca.pdbs(pdbs = pdbs)
+
+Class:
+  pca
+
+Number of eigenvalues:
+  612
+
+        Eigenvalue Variance Cumulative
+   PC 1   2824.299   84.993     84.993
+   PC 2    384.613   11.574     96.568
+   PC 3     62.077    1.868     98.436
+   PC 4     19.614    0.590     99.026
+   PC 5     14.644    0.441     99.467
+   PC 6      5.228    0.157     99.624
+
+   (Obtained from 13 conformers with 612 xyz input values).
+
++ attr: L, U, z, au, sdev, mean, call</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pc.xray)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class09_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Function rmsd() will calculate all pairwise RMSD values of the structural ensemble. This facilitates clustering analysis based on the pairwise structural deviation:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate RMSD</span></span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>rd <span class="ot">&lt;-</span> <span class="fu">rmsd</span>(pdbs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in rmsd(pdbs): No indices provided, using the 204 non NA positions</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Structure-based clustering</span></span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>hc.rd <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="fu">dist</span>(rd))</span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>grps.rd <span class="ot">&lt;-</span> <span class="fu">cutree</span>(hc.rd, <span class="at">k=</span><span class="dv">3</span>)</span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pc.xray, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="at">col=</span><span class="st">"grey50"</span>, <span class="at">bg=</span>grps.rd, <span class="at">pch=</span><span class="dv">21</span>, <span class="at">cex=</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class09_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This plot is obtained by projecting the individual structures onto two selected PCs (e.g.&nbsp;PC-1 and PC-2). These projections display the inter-conformer relationship in terms of the conformational differences described by the selected PCs.</p>
+</section>
+</section>
+<section id="optional-further-visualization" class="level1">
+<h1>Optional further visualization</h1>
+<p>To visualize the major structural variations in the ensemble the function mktrj() can be used to generate a trajectory PDB file</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize first principal component</span></span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>pc1 <span class="ot">&lt;-</span> <span class="fu">mktrj</span>(pc.xray, <span class="at">pc=</span><span class="dv">1</span>, <span class="at">file=</span><span class="st">"pc_1.pdb"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="fu">view.pca</span>(pc.xray)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can also plot our main PCA results with ggplot:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Plotting results with ggplot2</span></span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb80-3"><a href="#cb80-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggrepel)</span>
+<span id="cb80-4"><a href="#cb80-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb80-5"><a href="#cb80-5" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">PC1=</span>pc.xray<span class="sc">$</span>z[,<span class="dv">1</span>], </span>
+<span id="cb80-6"><a href="#cb80-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">PC2=</span>pc.xray<span class="sc">$</span>z[,<span class="dv">2</span>], </span>
+<span id="cb80-7"><a href="#cb80-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">col=</span><span class="fu">as.factor</span>(grps.rd),</span>
+<span id="cb80-8"><a href="#cb80-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">ids=</span>ids)</span>
+<span id="cb80-9"><a href="#cb80-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb80-10"><a href="#cb80-10" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df) <span class="sc">+</span> </span>
+<span id="cb80-11"><a href="#cb80-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(PC1, PC2, <span class="at">col=</span>col, <span class="at">label=</span>ids) <span class="sc">+</span></span>
+<span id="cb80-12"><a href="#cb80-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb80-13"><a href="#cb80-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text_repel</span>(<span class="at">max.overlaps =</span> <span class="dv">20</span>) <span class="sc">+</span></span>
+<span id="cb80-14"><a href="#cb80-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span>
+<span id="cb80-15"><a href="#cb80-15" aria-hidden="true" tabindex="-1"></a>p</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class09_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="normal-mode-analysis" class="level1">
+<h1>Normal mode analysis</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="co"># NMA of all structures</span></span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a>modes <span class="ot">&lt;-</span> <span class="fu">nma</span>(pdbs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Details of Scheduled Calculation:
+  ... 13 input structures 
+  ... storing 606 eigenvectors for each structure 
+  ... dimension of x$U.subspace: ( 612x606x13 )
+  ... coordinate superposition prior to NM calculation 
+  ... aligned eigenvectors (gap containing positions removed)  
+  ... estimated memory usage of final 'eNMA' object: 36.9 Mb 
+
+
+  |                                                                            
+  |                                                                      |   0%
+  |                                                                            
+  |=====                                                                 |   8%
+  |                                                                            
+  |===========                                                           |  15%
+  |                                                                            
+  |================                                                      |  23%
+  |                                                                            
+  |======================                                                |  31%
+  |                                                                            
+  |===========================                                           |  38%
+  |                                                                            
+  |================================                                      |  46%
+  |                                                                            
+  |======================================                                |  54%
+  |                                                                            
+  |===========================================                           |  62%
+  |                                                                            
+  |================================================                      |  69%
+  |                                                                            
+  |======================================================                |  77%
+  |                                                                            
+  |===========================================================           |  85%
+  |                                                                            
+  |=================================================================     |  92%
+  |                                                                            
+  |======================================================================| 100%</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(modes, pdbs, <span class="at">col=</span>grps.rd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extracting SSE from pdbs$sse attribute</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Class09_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>Q14. What do you note about this plot? Are the black and colored lines similar or different? Where do you think they differ most and why?</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>A14: There are two distinct groups of structures that can be identified from this plot, which corresponds pretty well to our clusters identified from PCA. The black and colored lines are very different, they corresponds to the active state of ADK and inactive state of ADK(due to inhibitor, catalytically dead mutation etc.)</p>
+</blockquote>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
