@@ -39,3 +39,5 @@ Classwork for [BIMM143 Bioinformatics at UC San Diego](https://bioboot.github.io
 - Class 10 [Halloween Candy Mini-Project](Class10/Class10.md)
 
 - Class 11 [Protein Structure Prediction](Class11/Class11.md)
+
+- Class 12 [RNA Seq Data Analysis](Class12/Class12.md)
