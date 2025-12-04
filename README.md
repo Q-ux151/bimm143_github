@@ -5,3 +5,4 @@ Classwork for [BIMM143 Bioinformatics at UC San Diego](https://bioboot.github.io
 - Class 04 [R Fundamentals]()
 - Class 05 [Data Visualization with ggplot](Class05/Class_05_re_try.qmd)
 -  Class 06 [Writing a R function](Class06/Class06.qmd)
+-  Class 08 [Mini Project](Class08/class08_Mini_Project.md)
