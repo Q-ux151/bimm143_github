@@ -1,7 +1,7 @@
 ---
 title: "Class 06: R Functions Lab"
 author: "Qihao Liu"
-format: pdf
+format: gfm
 ---
 
 All functions in R has at least three things
